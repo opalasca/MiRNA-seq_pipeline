@@ -1,0 +1,41 @@
+Data download
+
+Use sra-toolkits; alternatively we can download from ENA, but seems easier to select desired samples to download with SRA Run Selector
+
+
+Obtain list of samples (SRRs) and metadata info from the SRA Run Selector ->
+Go to https://www.ncbi.nlm.nih.gov/Traces/study/?go=home and type the study accession number (e.g. GSE81266) into the search field.
+If not all conditions are of interest, select Facets/disease state/etc. accordingly 
+Make a folder with the name of the study accession on the server
+cd /home/projects/misc/anigen/IBD_public_data/human/ 
+mkdir -p GSE81266 
+Download SRR_Acc_List.txt and SRA_runtable.txt to the folder (eventually save locally and copy to the server using scp). 
+
+Make sure you are on rna02 before starting the download and/or fastQC scripts.
+	ssh rna02
+Go to the folder you created for the study
+	cd /home/projects/misc/anigen/IBD_public_data/human/GSE81266  
+Download files:
+	nohup sh /home/projects/cpr/anigen/data/IBD_public_data/scripts/download.sh &
+Wait until the download is finished and then run FastQC:
+nohup sh /home/projects/cpr/anigen/data/IBD_public_data/scripts/run_fastqc.sh &
+FastQC files will be placed in results/fastqc in the folder of the study
+	
+See here what nohup command does https://www.computerhope.com/unix/unohup.htm
+(After writing the command terminated in "&" press enter and you can continue working in the terminal while the script runs in the background)
+
+Adapter trimming:
+	n=`wc -l SRR_Acc_List.txt | awk '{print $1}'` 
+qsub -v WD=$(pwd) -t 1-$n    /home/projects/cpr/anigen/data/IBD_public_data/scripts/run_flexbar_batch.sh
+
+Create file config.txt
+
+Read collapsing: 
+Adapt script
+/home/projects/cpr/anigen/data/IBD_public_data/scripts/run_collapser_batch.sh
+
+Mapping with Bowtie:
+Adapt script
+/home/projects/cpr/anigen/data/IBD_public_data/scripts/run_bowtie_batch.sh
+
+
